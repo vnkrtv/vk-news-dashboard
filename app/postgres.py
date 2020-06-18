@@ -34,7 +34,7 @@ class GroupsStorage(PostgresStorage):
         self._conn = storage.get_connection()
         self._cursor = storage.get_cursor()
 
-    def get_groups(self):
+    def get_groups(self) -> list:
         self._cursor.execute('SELECT * FROM groups')
         groups = self._cursor.fetchall()
         return list(groups)
@@ -46,7 +46,7 @@ class PostsStorage(PostgresStorage):
         self._conn = storage.get_connection()
         self._cursor = storage.get_cursor()
 
-    def get_posts(self):
+    def get_posts(self) -> list:
         self._cursor.execute('SELECT * FROM posts')
         posts = self._cursor.fetchall()
         return list(posts)
