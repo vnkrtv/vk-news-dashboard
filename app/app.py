@@ -1,9 +1,8 @@
 import dash
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import app.config as cfg
+from app import config as cfg
 import pandas as pd
-
 from .graphs import groups_pie_chart
 from .preprocessing import TextProcessor
 from .postgres import (
@@ -38,7 +37,7 @@ data = pd.DataFrame()
 for group in groups_df.iterrows():
     row = {
         'groups': group[1][0],
-        'posts_count': len(news[posts['group']==group[1][1]])
+        'posts_count': len(posts_df[posts_df['group']==group[1][1]])
     }
     data = data.append(row, ignore_index=True)
 
@@ -49,5 +48,3 @@ app.layout = html.Div([
     groups_pie_chart(data=data)
 ])
 
-if __name__ == "__main__":
-    app.run_server(debug=True)

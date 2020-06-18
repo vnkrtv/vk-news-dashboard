@@ -7,8 +7,8 @@ class PostgresStorage:
 
     """
 
-    _conn: psycopg2.connection
-    _cursor: psycopg2.cursor
+    _conn = None
+    _cursor = None
 
     @staticmethod
     def connect(dbname: str, user: str, password: str, host: str, port: int):
@@ -17,14 +17,15 @@ class PostgresStorage:
             dbname=dbname,
             user=user,
             password=password,
-            host='%s:%d' % (host, port))
+            host=host,
+            port=port)
         storage._cursor = storage._conn.cursor()
         return storage
 
-    def get_connection(self) -> psycopg2.connection:
+    def get_connection(self):
         return self._conn
 
-    def get_cursor(self) -> psycopg2.cursor:
+    def get_cursor(self):
         return self._cursor
 
 
