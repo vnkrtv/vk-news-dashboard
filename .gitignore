@@ -1,5 +1,5 @@
 venv
 .idea
-.ipynb_checkpoints
+app/.ipynb_checkpoints
 
 *.pyc

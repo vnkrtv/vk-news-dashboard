@@ -36,6 +36,7 @@ class TextProcessor:
             'likes_count': [post[5] for post in posts_list],
             'views_count': [post[6] for post in posts_list],
             'comments_count': [post[7] for post in posts_list],
-            'reposts_count': [post[8] for post in posts_list]
+            'reposts_count': [post[8] for post in posts_list],
+            'date': [post[2] for post in posts_list]
         })
 

@@ -3,7 +3,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from app import config as cfg
 import pandas as pd
-from .graphs import groups_pie_chart
+from .graphs import groups_pie_chart, LineCharts
 from .preprocessing import TextProcessor
 from .postgres import (
     PostgresStorage, PostsStorage, GroupsStorage)
@@ -50,13 +50,27 @@ app.layout = html.Div([
             dbc.DropdownMenu([
                 dbc.DropdownMenuItem('Ru'),
                 dbc.DropdownMenuItem('En')
-            ], label='Lang')
+            ], label='Lang', className='navbar-brand nav-link', in_navbar=True)
         ],
             className='d-flex justify-content-between')
     ],
-        className='navbar'),
+        className='navbar shadow-sm'),
     html.Div([
-        groups_pie_chart(data=data)
+        groups_pie_chart(data=data),
+        LineCharts.views(posts_df, 'meduzaproject'),
+        LineCharts.views(posts_df, 'tj'),
+        LineCharts.views(posts_df, 'ria'),
+        LineCharts.views(posts_df, 'rbc'),
+
+        LineCharts.likes(posts_df, 'meduzaproject'),
+        LineCharts.likes(posts_df, 'tj'),
+        LineCharts.likes(posts_df, 'ria'),
+        LineCharts.likes(posts_df, 'rbc'),
+
+        LineCharts.comments(posts_df, 'meduzaproject'),
+        LineCharts.comments(posts_df, 'tj'),
+        LineCharts.comments(posts_df, 'ria'),
+        LineCharts.comments(posts_df, 'rbc')
     ],
         className='container')
 
