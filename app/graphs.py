@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def groups_pie_chart(data: pd.DataFrame):
-    graph = html.Div([
+    return html.Div([
         html.H4('Groups', style={'text-align': 'center'}),
         dcc.Graph(
             id='Groups-distribution',
@@ -19,4 +19,3 @@ def groups_pie_chart(data: pd.DataFrame):
             )
         )
     ])
-    return graph

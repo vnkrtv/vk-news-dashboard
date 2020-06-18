@@ -15,7 +15,6 @@ app = dash.Dash(
     serve_locally=True
 )
 
-
 server = app.server
 
 storage = PostgresStorage.connect(
@@ -37,14 +36,28 @@ data = pd.DataFrame()
 for group in groups_df.iterrows():
     row = {
         'groups': group[1][0],
-        'posts_count': len(posts_df[posts_df['group']==group[1][1]])
+        'posts_count': len(posts_df[posts_df['group'] == group[1][1]])
     }
     data = data.append(row, ignore_index=True)
 
-app.layout = html.Div([
-    dbc.Alert(
-        "Hello, Bootstrap!", className="m-5"
-    ),
-    groups_pie_chart(data=data)
-])
 
+app.layout = html.Div([
+    html.Div([
+        html.A(className="navbar-brand d-flex align-items-center", children=[
+            html.Strong('VK News Analyzer')
+        ]),
+        html.Div([
+            dbc.DropdownMenu([
+                dbc.DropdownMenuItem('Ru'),
+                dbc.DropdownMenuItem('En')
+            ], label='Lang')
+        ],
+            className='d-flex justify-content-between')
+    ],
+        className='navbar'),
+    html.Div([
+        groups_pie_chart(data=data)
+    ],
+        className='container')
+
+])
