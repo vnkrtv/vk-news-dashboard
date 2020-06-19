@@ -4,7 +4,6 @@ import pymorphy2
 
 
 class TextProcessor:
-
     morph = pymorphy2.MorphAnalyzer()
     pattern = re.compile(r'\W')
     not_digit = re.compile(r'\D')
@@ -29,7 +28,7 @@ class TextProcessor:
 
     @staticmethod
     def parse_posts(posts_list: list) -> pd.DataFrame:
-        return pd.DataFrame({
+        df = pd.DataFrame({
             'title': [post[3] for post in posts_list],
             'text': [post[4] for post in posts_list],
             'group': [post[1] for post in posts_list],
@@ -39,4 +38,10 @@ class TextProcessor:
             'reposts_count': [post[8] for post in posts_list],
             'date': [post[2] for post in posts_list]
         })
-
+        df['hovertext'] = df.apply(lambda row: '<b>' + row['title'] + '</b><br><br>' +
+                                               'Дата: ' + str(row['date']) + '<br>' +
+                                               'Лайки: ' + str(row['likes_count']) + '<br>' +
+                                               'Комментарии: ' + str(row['comments_count']) + '<br>' +
+                                               'Просмотры: ' + str(row['views_count']) + '<br>' +
+                                               'Репосты: ' + str(row['reposts_count']), axis=1)
+        return df.sort_values(by=['date'], ascending=False)
