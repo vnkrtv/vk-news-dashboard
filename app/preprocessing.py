@@ -21,6 +21,7 @@ class TextProcessor:
     @staticmethod
     def parse_groups(groups_list: list) -> pd.DataFrame:
         return pd.DataFrame({
+            'id': [group[0] for group in groups_list],
             'name': [group[2] for group in groups_list],
             'screen_name': [group[1] for group in groups_list],
             'members_count': [group[3] for group in groups_list]
@@ -29,6 +30,7 @@ class TextProcessor:
     @staticmethod
     def parse_posts(posts_list: list) -> pd.DataFrame:
         df = pd.DataFrame({
+            'id': [post[0] for post in posts_list],
             'title': [post[3] for post in posts_list],
             'text': [post[4] for post in posts_list],
             'group': [post[1] for post in posts_list],

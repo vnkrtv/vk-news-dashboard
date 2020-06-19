@@ -64,6 +64,10 @@ class LineCharts:
 class NewsTable:
 
     @staticmethod
+    def get_post_href(group_screen_name: str, group_id: int, post_id: int) -> str:
+        return f'https://vk.com/{group_screen_name}?w=wall-{group_id}_{post_id}'
+
+    @staticmethod
     def get_news(posts_df: pd.DataFrame, groups_df: pd.DataFrame) -> html.Div:
         max_rows = 5
         return html.Div(
@@ -82,7 +86,12 @@ class NewsTable:
                                     children=[
                                         html.A(
                                             children=posts_df.iloc[i]["title"],
-                                            href='#',
+                                            href=NewsTable.get_post_href(
+                                                group_screen_name=posts_df.iloc[i]["group"],
+                                                post_id=posts_df.iloc[i]["id"],
+                                                group_id=groups_df[
+                                                    groups_df['screen_name'] == posts_df.iloc[i]["group"]
+                                                ].iloc[0]['id']),
                                             title=groups_df[
                                                 groups_df['screen_name'] == posts_df.iloc[i]["group"]
                                                 ].iloc[0]['name'] + '\n' +

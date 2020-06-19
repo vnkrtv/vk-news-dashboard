@@ -48,6 +48,14 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             html.Div([
+                html.Div([
+                    html.H4('Группа'),
+                    html.Select([
+                        html.Option(groups_df.iloc[i]['name']) for i in range(len(groups_df))
+                    ],
+                        className='form-control')
+                ]),
+                html.Hr(),
                 graphs.NewsTable.get_news(posts_df, groups_df)
             ],
                 className='col-2'),
