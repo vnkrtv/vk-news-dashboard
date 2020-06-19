@@ -2,7 +2,7 @@ import dash
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from . import config as cfg
-from .graphs import LineCharts
+from . import graphs
 from .preprocessing import TextProcessor
 from .postgres import (
     PostgresStorage, PostsStorage, GroupsStorage)
@@ -46,10 +46,18 @@ app.layout = html.Div([
     ],
         className='navbar shadow-sm'),
     html.Div([
-        LineCharts.views(posts_df, groups_df.loc[0]),
-        LineCharts.likes(posts_df, groups_df.loc[0]),
-        LineCharts.comments(posts_df, groups_df.loc[3])
+        html.Div([
+            html.Div([
+                graphs.NewsTable.get_news(posts_df, groups_df)
+            ],
+                className='col-2'),
+            html.Div([
+                graphs.LineCharts.likes(posts_df, groups_df.loc[1])
+            ],
+                className='col-10')
+        ],
+            className='row')
     ],
-        className='container')
+        className='', style={'width': '100%', 'margin': '5vh'})
 
 ])
