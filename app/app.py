@@ -33,39 +33,39 @@ groups_df = TextProcessor.parse_groups(groups_list)
 
 app.layout = html.Div([
     html.Div([
-        html.A(className="navbar-brand d-flex align-items-center", children=[
-            html.Strong('VK News Analyzer')
-        ]),
-        html.Div([
-            dbc.DropdownMenu([
-                dbc.DropdownMenuItem('Ru'),
-                dbc.DropdownMenuItem('En')
-            ], label='Язык', className='navbar-brand nav-link', in_navbar=True)
+        html.A(className="navbar-brand", children=[
+            html.Strong('VK News Dashboard')
         ],
-            className='d-flex justify-content-between')
+               style={'position': 'absolute', 'margin-top': '0.5vh'})
     ],
-        className='navbar shadow-sm'),
+        className='navbar navbar-dark bg-dark shadow-sm', style={'height': '5vh'}),
     html.Div([
         html.Div([
             html.Div([
-                html.Div([
-                    html.H4('Группа'),
-                    html.Select([
-                        html.Option(groups_df.iloc[i]['name']) for i in range(len(groups_df))
+                dbc.Card([
+                    html.Div([
+                        html.H4('Группа'),
+                        html.Select([
+                            html.Option(groups_df.iloc[i]['name']) for i in range(len(groups_df))
+                        ],
+                            id='group-select',
+                            className='form-control')
                     ],
-                        className='form-control')
-                ]),
-                html.Hr(),
-                graphs.NewsTable.get_news(posts_df, groups_df)
+                        style={'margin': '1vh'}),
+                    graphs.NewsTable.get_news(posts_df, groups_df)
+                ])
+
             ],
                 className='col-2'),
             html.Div([
-                graphs.LineCharts.likes(posts_df, groups_df.loc[1])
+                dbc.Card([
+                    graphs.LineCharts.likes(posts_df, groups_df.loc[1])
+                ])
             ],
                 className='col-10')
         ],
             className='row')
     ],
-        className='', style={'width': '100%', 'margin': '5vh'})
+        className='', style={'width': '97%', 'margin': '3vh'})
 
 ])

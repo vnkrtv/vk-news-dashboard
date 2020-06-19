@@ -105,5 +105,6 @@ class NewsTable:
                         for i in range(min(len(posts_df), max_rows))
                     ],
                 ),
-            ]
+            ],
+            style={'margin': '1vh'}
         )
