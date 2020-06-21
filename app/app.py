@@ -1,3 +1,5 @@
+import asyncio
+import threading
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -83,6 +85,8 @@ app.layout = html.Div([
     Output("likes-plot", "children"),
     [Input("group-select", "value")])
 def plots_update(value):
+    if value is None:
+        return
     group = groups_df[groups_df['name'] == value].iloc[0]
     return graphs.LineCharts.likes(posts_df, group)
 
@@ -91,6 +95,8 @@ def plots_update(value):
     Output("group-info", "children"),
     [Input("group-select", "value")])
 def groups_info_update(value):
+    if value is None:
+        return []
     group = groups_df[groups_df['name'] == value].iloc[0]
     group_posts = posts_df[posts_df['group'] == group['screen_name']]
     children = [
@@ -106,3 +112,25 @@ def groups_info_update(value):
     ]
     return children
 
+
+@asyncio.coroutine
+def update_data():
+    global posts_list, groups_list, posts_df, groups_df
+    while True:
+        yield from asyncio.sleep(6)
+        print('Updated!')
+        posts_list = posts_storage.get_posts()
+        groups_list = groups_storage.get_groups()
+
+        posts_df = TextProcessor.parse_posts(posts_list)
+        groups_df = TextProcessor.parse_groups(groups_list)
+
+
+def update_data_loop(update_loop):
+    asyncio.set_event_loop(update_loop)
+    update_loop.run_until_complete(update_data())
+
+
+loop = asyncio.get_event_loop()
+t = threading.Thread(target=update_data_loop, args=(loop,))
+t.start()
