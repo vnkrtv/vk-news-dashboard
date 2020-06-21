@@ -25,7 +25,7 @@ server = app.server
 storage = PostgresStorage.connect(
     dbname=cfg.PG_NAME,
     user=cfg.PG_USER,
-    password=cfg.PG_PASSWORD,
+    password=cfg.PG_PASS,
     host=cfg.PG_HOST,
     port=cfg.PG_PORT)
 groups_storage = GroupsStorage(storage)
@@ -86,7 +86,6 @@ app.layout = html.Div([
             className='row')
     ],
         className='', style={'width': '97%', 'margin': '3vh'})
-
 ])
 
 
