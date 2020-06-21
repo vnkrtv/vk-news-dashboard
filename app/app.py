@@ -11,6 +11,8 @@ from .preprocessing import TextProcessor
 from .postgres import (
     PostgresStorage, PostsStorage, GroupsStorage)
 
+DATA_UPDATING_INTERVAL = 600  # 10 minutes
+
 app = dash.Dash(
     'VK News',
     meta_tags=[{"name": "viewport", "content": "width=device-width"}],
@@ -62,8 +64,15 @@ app.layout = html.Div([
                     html.Div([],
                              id='group-info',
                              style={'margin': '1vh'}),
-                    graphs.NewsTable.get_news(posts_df, groups_df)
-                ])
+                    dcc.Interval(
+                                id='data-update-interval',
+                                interval=1000 * DATA_UPDATING_INTERVAL,  # in milliseconds
+                                n_intervals=0
+                            ),
+                    html.Div([],
+                             style={'margin': '1vh'},
+                             id='news-container')
+                ], id='left-card')
 
             ],
                 className='col-2'),
@@ -113,12 +122,17 @@ def groups_info_update(value):
     return children
 
 
+@app.callback(Output('news-container', 'children'),
+              [Input('data-update-interval', 'n_intervals')])
+def update_news(_):
+    return graphs.NewsTable.update_news(posts_df, groups_df)
+
+
 @asyncio.coroutine
 def update_data():
     global posts_list, groups_list, posts_df, groups_df
     while True:
-        yield from asyncio.sleep(6)
-        print('Updated!')
+        yield from asyncio.sleep(DATA_UPDATING_INTERVAL)
         posts_list = posts_storage.get_posts()
         groups_list = groups_storage.get_groups()
 
