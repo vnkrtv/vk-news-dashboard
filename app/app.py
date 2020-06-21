@@ -76,12 +76,12 @@ app.layout = html.Div([
 
             ],
                 className='col-2'),
-            html.Div([
-                dbc.Card([
-
-                ], id='likes-plot')
-            ],
-                className='col-10')
+            html.Div([],
+                     className='col-5',
+                     id='left-plots'),
+            html.Div([],
+                     className='col-5',
+                     id='right-plots')
         ],
             className='row')
     ],
@@ -91,13 +91,27 @@ app.layout = html.Div([
 
 
 @app.callback(
-    Output("likes-plot", "children"),
+    Output("left-plots", "children"),
     [Input("group-select", "value")])
-def plots_update(value):
+def left_plots_update(value):
     if value is None:
         return
     group = groups_df[groups_df['name'] == value].iloc[0]
-    return graphs.LineCharts.likes(posts_df, group)
+    return [
+        graphs.LineCharts.views(posts_df, group),
+        graphs.LineCharts.comments(posts_df, group)]
+
+
+@app.callback(
+    Output("right-plots", "children"),
+    [Input("group-select", "value")])
+def right_plots_update(value):
+    if value is None:
+        return
+    group = groups_df[groups_df['name'] == value].iloc[0]
+    return [
+        graphs.LineCharts.likes(posts_df, group),
+        graphs.LineCharts.reposts(posts_df, group)]
 
 
 @app.callback(

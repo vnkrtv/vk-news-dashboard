@@ -1,6 +1,7 @@
 import datetime
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 import pandas as pd
 
@@ -8,7 +9,7 @@ import pandas as pd
 class LineCharts:
 
     @staticmethod
-    def get_graph(data: pd.DataFrame, title: str, graph_id: str, y_data: str) -> html.Div:
+    def get_graph(data: pd.DataFrame, title: str, graph_id: str, y_data: str) -> dbc.Card:
         fig = go.Figure(
             layout=dict(
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -24,14 +25,14 @@ class LineCharts:
         fig.layout.xaxis.range = pd.date_range(
             start=datetime.datetime.now() - datetime.timedelta(days=1),
             end=datetime.datetime.now())
-        return html.Div([
+        return dbc.Card([
             html.H4(title, style={'text-align': 'center'}),
             dcc.Graph(
                 id=graph_id,
                 figure=fig
             )
         ],
-            style={'margin': '1vh'})
+            style={'margin-bottom': '3vh'})
 
     @staticmethod
     def views(posts_df: pd.DataFrame, group: pd.Series) -> html.Div:
