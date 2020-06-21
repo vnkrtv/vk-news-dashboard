@@ -9,24 +9,29 @@ class LineCharts:
 
     @staticmethod
     def get_graph(data: pd.DataFrame, title: str, graph_id: str, y_data: str) -> html.Div:
+        fig = go.Figure(
+            layout=dict(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',),
+            data=[go.Scatter(
+                x=data['date'],
+                y=data[y_data],
+                text=data['hovertext'],
+                hovertemplate='%{text}<br>'
+                              '<extra></extra>'
+            )]
+        )
+        fig.layout.xaxis.range = pd.date_range(
+            start=datetime.datetime.now() - datetime.timedelta(days=1),
+            end=datetime.datetime.now())
         return html.Div([
             html.H4(title, style={'text-align': 'center'}),
             dcc.Graph(
                 id=graph_id,
-                figure=go.Figure(
-                    layout=dict(
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        plot_bgcolor='rgba(0,0,0,0)'),
-                    data=[go.Scatter(
-                        x=data['date'],
-                        y=data[y_data],
-                        text=data['hovertext'],
-                        hovertemplate='%{text}<br>'
-                                      '<extra></extra>'
-                    )]
-                )
+                figure=fig
             )
-        ])
+        ],
+            style={'margin': '1vh'})
 
     @staticmethod
     def views(posts_df: pd.DataFrame, group: pd.Series) -> html.Div:
