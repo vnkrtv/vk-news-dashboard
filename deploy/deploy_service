@@ -1,0 +1,59 @@
+#!/bin/bash
+
+git clone https://github.com/LeadNess/go-vk-news-loader.git
+
+read -r -p "VK Token: " VK_TOKEN
+if [ "${VK_TOKEN}" == "" ]
+then
+  echo "Error: VK Token must be specify"
+  exit 1
+fi
+
+read -r -p "PostgreSQL password: " PG_PASS
+if [ "${PG_PASS}" == "" ]
+then
+  echo "Error: PostgreSQL password must be specify"
+  exit 1
+fi
+
+PG_USER=postgres
+PG_HOST=postgres
+PG_PORT=5432
+PG_NAME=vknews
+
+cat > deploy/entrypoint <<- EOM
+#!/bin/bash
+
+cd /usr/share/python3
+. /usr/share/python3/venv/bin/activate
+
+export PG_USER=${PG_USER}
+export PG_PASS=${PG_PASS}
+export PG_HOST=${PG_HOST}
+export PG_PORT=${PG_PORT}
+export PG_NAME=${PG_NAME}
+
+python vk-news-dashboard/run.py
+EOM
+
+cat > go-vk-news-loader/config/config.json <<- EOM
+{
+  "pguser":   "${PG_USER}",
+  "pgpass":   "${PG_PASS}",
+  "pgname":   "${PG_NAME}",
+  "pghost":   "${PG_HOST}",
+  "pgport":   "${PG_PORT}",
+  "vktoken":  "${VK_TOKEN}",
+  "interval": 600
+}
+EOM
+
+DOCKER_COMPOSE="$(echo "$(cat ./docker-compose.yml)")"
+DOCKER_COMPOSE="${DOCKER_COMPOSE/PG_PASS/${PG_PASS}}"
+echo "${DOCKER_COMPOSE}" > ./docker-compose.yml
+
+cd go-vk-news-loader
+sudo docker build -t go-vk-news-loader .
+cd ..
+
+sudo docker-compose build

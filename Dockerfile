@@ -12,5 +12,7 @@ FROM snakepacker/python:3.7 as api
 COPY --from=builder /usr/share/python3/venv /usr/share/python3/venv
 COPY . /usr/share/python3/vk-news-dashboard
 COPY deploy/entrypoint /entrypoint
+RUN chmod +x /entrypoint
+ENV TZ=Europe/Moscow
 
 ENTRYPOINT ["/entrypoint"]

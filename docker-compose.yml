@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: vk-news-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=vknews
+      - TZ=Europe/Moscow
+    networks:
+      - backend
+
+  news-loader:
+    image: vk-news-loader
+    container_name: vk-news-loader
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  web:
+    build: .
+    container_name: vk-news-dashboard
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8050:8050"
+    environment:
+      - TZ=Europe/Moscow
+    depends_on:
+      - news-loader
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

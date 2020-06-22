@@ -32,17 +32,18 @@ then
   PG_NAME=vknews
 fi
 
-cat >> deploy/entrypoint <<- EOM
+cat > deploy/entrypoint <<- EOM
 #!/bin/bash
 
 cd /usr/share/python3
 . /usr/share/python3/venv/bin/activate
 
-export PG_USER={PG_USER}
-export PG_PASS={PG_PASS}
-export PG_HOST={PG_HOST}
-export PG_PORT={PG_PORT}
-export PG_NAME={PG_NAME}
+export PG_USER=${PG_USER}
+export PG_PASS=${PG_PASS}
+export PG_HOST=${PG_HOST}
+export PG_PORT=${PG_PORT}
+export PG_NAME=${PG_NAME}
 
 python vk-news-dashboard/run.py
 EOM
+

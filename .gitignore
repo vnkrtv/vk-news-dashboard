@@ -1,5 +1,5 @@
 venv
 .idea
 app/.ipynb_checkpoints
-
+notebook
 *.pyc
