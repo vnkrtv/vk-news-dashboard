@@ -1,7 +1,5 @@
 #!/bin/bash
 
-git clone https://github.com/LeadNess/go-vk-news-loader.git
-
 read -r -p "VK Token: " VK_TOKEN
 if [ "${VK_TOKEN}" == "" ]
 then

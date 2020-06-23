@@ -1,4 +1,4 @@
-FROM python:3.7 as builder
+FROM python:3.7
 MAINTAINER LeadNess
 
 RUN python3.7 -m venv /usr/share/python3/venv
