@@ -7,7 +7,7 @@ services:
     container_name: vk-news-postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_PASSWORD=PG_PASS
       - POSTGRES_DB=vknews
       - TZ=Europe/Moscow
     networks:
