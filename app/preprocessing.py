@@ -1,4 +1,5 @@
 import re
+import datetime
 import pandas as pd
 import pymorphy2
 
@@ -38,7 +39,7 @@ class TextProcessor:
             'views_count': [post[6] for post in posts_list],
             'comments_count': [post[7] for post in posts_list],
             'reposts_count': [post[8] for post in posts_list],
-            'date': [post[2] for post in posts_list]
+            'date': [post[2] + datetime.timedelta(hours=3) for post in posts_list]
         })
         df['hovertext'] = df.apply(lambda row: '<b>' + row['title'] + '</b><br><br>' +
                                                'Дата: ' + str(row['date']) + '<br>' +
