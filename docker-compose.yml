@@ -15,7 +15,7 @@ services:
 
   news-loader:
     image: vk-news-loader
-    container_name: vk-news-loader
+    container_name: go-vk-news-loader
     restart: unless-stopped
     environment:
       - TZ=Europe/Moscow
