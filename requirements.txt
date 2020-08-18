@@ -4,3 +4,5 @@ dash==1.12.0
 psycopg2==2.8.5
 dash-bootstrap-components==0.10.2
 pymorphy2==0.8
+gunicorn==20.0.4
+

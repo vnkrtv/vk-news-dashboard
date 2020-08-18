@@ -31,7 +31,8 @@ export PG_HOST=${PG_HOST}
 export PG_PORT=${PG_PORT}
 export PG_NAME=${PG_NAME}
 
-python vk-news-dashboard/run.py
+cd vk-news-dashboard
+gunicorn wsgi:application -b 0.0.0.0:5000
 EOM
 
 cat > go-vk-news-loader/config/config.json <<- EOM
