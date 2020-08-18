@@ -32,7 +32,7 @@ export PG_PORT=${PG_PORT}
 export PG_NAME=${PG_NAME}
 
 cd vk-news-dashboard
-gunicorn wsgi:application -b 0.0.0.0:5000
+gunicorn wsgi:server -b 0.0.0.0:5000
 EOM
 
 cat > go-vk-news-loader/config/config.json <<- EOM
