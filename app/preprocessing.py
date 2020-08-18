@@ -20,6 +20,20 @@ class TextProcessor:
         return ' '.join(words)
 
     @staticmethod
+    def parse_title(title: str) -> str:
+        if len(title) < 80:
+            return title
+        processed_title = ''
+        one_newline = False
+        for i, ch in enumerate(title):
+            if i > 60 and ch == ' ' and not one_newline:
+                processed_title += f'{ch}<br>'
+                one_newline = True
+            else:
+                processed_title += ch
+        return processed_title
+
+    @staticmethod
     def parse_groups(groups_list: list) -> pd.DataFrame:
         return pd.DataFrame({
             'id': [group[0] for group in groups_list],
@@ -41,7 +55,7 @@ class TextProcessor:
             'reposts_count': [post[8] for post in posts_list],
             'date': [post[2] + datetime.timedelta(hours=3) for post in posts_list]
         })
-        df['hovertext'] = df.apply(lambda row: '<b>' + row['title'] + '</b><br><br>' +
+        df['hovertext'] = df.apply(lambda row: '<b>' + TextProcessor.parse_title(row['title']) + '</b><br><br>' +
                                                'Дата: ' + str(row['date']) + '<br>' +
                                                'Лайки: ' + str(row['likes_count']) + '<br>' +
                                                'Комментарии: ' + str(row['comments_count']) + '<br>' +
