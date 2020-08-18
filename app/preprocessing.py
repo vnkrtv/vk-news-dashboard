@@ -26,8 +26,14 @@ class TextProcessor:
         processed_title = ''
         one_newline = False
         for i, ch in enumerate(title):
-            if i > 60 and ch == ' ' and not one_newline:
-                processed_title += f'{ch}<br>'
+            if 60 < i < 120 and ch == ' ' and not one_newline:
+                processed_title += '<br>'
+                one_newline = True
+            if 120 < i < 180 and ch == ' ' and one_newline:
+                processed_title += '<br>'
+                one_newline = False
+            if 180 < i and ch == ' ' and not one_newline:
+                processed_title += '<br>'
                 one_newline = True
             else:
                 processed_title += ch

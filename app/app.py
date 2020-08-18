@@ -21,6 +21,7 @@ app = dash.Dash(
 )
 
 server = app.server
+app.title = 'VK News Dashboard'
 
 storage = PostgresStorage.connect(
     dbname=cfg.PG_NAME,
