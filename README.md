@@ -4,7 +4,7 @@
 
 ### Description
 
-[Simple dashboard](http://leadness.keenetic.name:8050/) implemented on Dash. Provides monitoring VK news groups posts:
+[Simple dashboard](http://vknews.vnkrtv.ru/) implemented on Dash. Provides monitoring VK news groups posts:
 - information about group:
   - members count
   - mean views count
