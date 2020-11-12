@@ -1,6 +1,6 @@
 # vk-news-dashboard
 
-[![Build Status](https://travis-ci.com/LeadNess/vk-news-dashboard.svg?branch=master)](https://travis-ci.com/LeadNess/vk-news-dashboard)
+[![Build Status](https://travis-ci.com/vnkrtv/vk-news-dashboard.svg?branch=master)](https://travis-ci.com/vnkrtv/vk-news-dashboard)
 
 ### Description
 
@@ -20,11 +20,11 @@
 ### Usage 
 
 Clone this repository:
-- ```git clone https://github.com/LeadNess/vk-news-dashboard.git```
+- ```git clone https://github.com/vnkrtv/vk-news-dashboard.git```
 - ```cd vk-news-dashboard```  
 
-Clone [service](https://github.com/LeadNess/go-vk-news-loader) which provides loading news from VK groups to PostgreSQL:
--  ```git clone https://github.com/LeadNess/go-vk-news-loader.git``` 
+Clone [service](https://github.com/vnkrtv/go-vk-news-loader) which provides loading news from VK groups to PostgreSQL:
+-  ```git clone https://github.com/vnkrtv/go-vk-news-loader.git``` 
 
 Set list of vk groups screen names in go-vk-news-loader/config/groups.json. Default groups.json content:
 - ```["meduzaproject", "ria", "kommersant_ru", "tj", "rbc"]```

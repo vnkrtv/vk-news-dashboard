@@ -1,5 +1,5 @@
 FROM python:3.7
-MAINTAINER LeadNess
+MAINTAINER vkkrtv
 
 RUN python3.7 -m venv /usr/share/python3/venv
 RUN /usr/share/python3/venv/bin/pip install -U pip
