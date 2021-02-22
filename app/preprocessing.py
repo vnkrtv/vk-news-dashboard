@@ -1,5 +1,7 @@
 import re
 import datetime
+from typing import List
+
 import pandas as pd
 import pymorphy2
 
@@ -40,7 +42,7 @@ class TextProcessor:
         return processed_title
 
     @staticmethod
-    def parse_groups(groups_list: list) -> pd.DataFrame:
+    def parse_groups(groups_list: List[tuple]) -> pd.DataFrame:
         return pd.DataFrame({
             'id': [group[0] for group in groups_list],
             'name': [group[2] for group in groups_list],
@@ -49,7 +51,7 @@ class TextProcessor:
         })
 
     @staticmethod
-    def parse_posts(posts_list: list) -> pd.DataFrame:
+    def parse_posts(posts_list: List[tuple]) -> pd.DataFrame:
         df = pd.DataFrame({
             'id': [post[0] for post in posts_list],
             'title': [post[3] for post in posts_list],

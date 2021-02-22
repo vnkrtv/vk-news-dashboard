@@ -1,4 +1,6 @@
 import datetime
+from typing import List, Any
+
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -75,7 +77,7 @@ class NewsTable:
 
 
     @staticmethod
-    def update_news(posts_df: pd.DataFrame, groups_df: pd.DataFrame) -> []:
+    def update_news(posts_df: pd.DataFrame, groups_df: pd.DataFrame) -> List[Any]:
         max_rows = 6
         return [
             html.H4(children="Новости"),

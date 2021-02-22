@@ -1,3 +1,5 @@
+from typing import List, Generator
+
 import psycopg2
 
 
@@ -7,52 +9,40 @@ class PostgresStorage:
 
     """
 
-    _conn = None
-    _cursor = None
+    conn: psycopg2.extensions.connection
 
-    @staticmethod
-    def connect(dbname: str, user: str, password: str, host: str, port: int):
-        storage = PostgresStorage()
-        storage._conn = psycopg2.connect(
+    def __init__(self, conn: psycopg2.extensions.connection):
+        self.conn = conn
+
+    @classmethod
+    def connect(cls, dbname: str, user: str, password: str, host: str, port: int):
+        conn = psycopg2.connect(
             dbname=dbname,
             user=user,
             password=password,
             host=host,
             port=port)
-        storage._cursor = storage._conn.cursor()
-        return storage
+        return cls(conn=conn)
 
-    def get_connection(self):
-        return self._conn
-
-    def get_cursor(self):
-        return self._cursor
+    def exec_query(self, query: str, params: list) -> Generator:
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(query, params)
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
+        return cursor.fetchall()
 
 
 class GroupsStorage(PostgresStorage):
 
-    def __init__(self, storage: PostgresStorage):
-        self._conn = storage.get_connection()
-        self._cursor = storage.get_cursor()
-
-    def get_groups(self) -> list:
-        self._cursor.execute('SELECT * FROM groups')
-        groups = self._cursor.fetchall()
-        return list(groups)
+    def get_groups(self) -> List[tuple]:
+        query, params = 'SELECT * FROM groups', []
+        return list(self.exec_query(query, params))
 
 
 class PostsStorage(PostgresStorage):
 
-    def __init__(self, storage: PostgresStorage):
-        self._conn = storage.get_connection()
-        self._cursor = storage.get_cursor()
-
-    def get_posts(self) -> list:
-        self._cursor.execute('SELECT * FROM posts')
-        posts = self._cursor.fetchall()
-        return list(posts)
-
-
-
-
-
+    def get_posts(self) -> List[tuple]:
+        query, params = 'SELECT * FROM posts', []
+        return list(self.exec_query(query, params))

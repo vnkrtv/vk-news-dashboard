@@ -29,8 +29,8 @@ storage = PostgresStorage.connect(
     password=cfg.PG_PASS,
     host=cfg.PG_HOST,
     port=cfg.PG_PORT)
-groups_storage = GroupsStorage(storage)
-posts_storage = PostsStorage(storage)
+groups_storage = GroupsStorage(conn=storage.conn)
+posts_storage = PostsStorage(conn=storage.conn)
 
 posts_list = posts_storage.get_posts()
 groups_list = groups_storage.get_groups()
