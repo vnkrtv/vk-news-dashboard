@@ -1,6 +1,7 @@
 from typing import List, Generator
 
 import psycopg2
+import pandas as pd
 
 
 class PostgresStorage:
@@ -33,6 +34,16 @@ class PostgresStorage:
             raise e
         return cursor.fetchall()
 
+    def insert_many(self, insert_query: str, data: List[tuple]):
+        cursor = self.conn.cursor()
+        try:
+            psycopg2.extras.execute_values(
+                cursor, insert_query, data)
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
+        return cursor.fetchall()
+
 
 class GroupsStorage(PostgresStorage):
 
@@ -46,3 +57,24 @@ class PostsStorage(PostgresStorage):
     def get_posts(self) -> List[tuple]:
         query, params = 'SELECT * FROM posts', []
         return list(self.exec_query(query, params))
+
+    def get_unprocessed_posts(self) -> List[tuple]:
+        query, params = '''SELECT post_id, date, title, text 
+                             FROM posts 
+                            WHERE date > (SELECT MAX(date) FROM entities)''', []
+        return list(self.exec_query(query, params))
+
+
+class EntitiesStorage(PostgresStorage):
+
+    def get_entities(self) -> List[tuple]:
+        query, params = 'SELECT post_id, type, date, entity FROM entities', []
+        return list(self.exec_query(query, params))
+
+    def add_entities(self, entities_list: List[tuple]):
+        insert_query = 'INSERT INTO entities(post_id, type, date, entity) VALUES %s'
+        self.insert_many(insert_query, entities_list)
+
+
+class Storage(GroupsStorage, PostsStorage, EntitiesStorage):
+    pass

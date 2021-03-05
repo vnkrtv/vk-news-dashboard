@@ -1,17 +1,17 @@
 import asyncio
 import threading
+
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+
 from . import config as cfg
 from . import graphs
 from .preprocessing import TextProcessor
-from .postgres import (
-    PostgresStorage, PostsStorage, GroupsStorage)
-
-DATA_UPDATING_INTERVAL = 600  # 10 minutes
+from .entities_extractor import EntitiesExtractor
+from .postgres import Storage
 
 app = dash.Dash(
     'VK News',
@@ -23,20 +23,21 @@ app = dash.Dash(
 server = app.server
 app.title = 'VK News Dashboard'
 
-storage = PostgresStorage.connect(
+extractor = EntitiesExtractor()
+storage = Storage.connect(
     dbname=cfg.PG_NAME,
     user=cfg.PG_USER,
     password=cfg.PG_PASS,
     host=cfg.PG_HOST,
     port=cfg.PG_PORT)
-groups_storage = GroupsStorage(conn=storage.conn)
-posts_storage = PostsStorage(conn=storage.conn)
 
-posts_list = posts_storage.get_posts()
-groups_list = groups_storage.get_groups()
+posts = storage.get_posts()
+groups = storage.get_groups()
+entities = storage.get_entities()
 
-posts_df = TextProcessor.parse_posts(posts_list)
-groups_df = TextProcessor.parse_groups(groups_list)
+posts_df = TextProcessor.parse_posts(posts)
+groups_df = TextProcessor.parse_groups(groups)
+entities_df = TextProcessor.parse_entities(entities)
 
 app.layout = html.Div([
     html.Div([
@@ -144,14 +145,21 @@ def update_news(_):
 
 @asyncio.coroutine
 def update_data():
-    global posts_list, groups_list, posts_df, groups_df
+    global storage, extractor, posts, groups, entities, posts_df, groups_df, entities_df
     while True:
-        yield from asyncio.sleep(DATA_UPDATING_INTERVAL)
-        posts_list = posts_storage.get_posts()
-        groups_list = groups_storage.get_groups()
+        yield from asyncio.sleep(cfg.DATA_UPDATING_INTERVAL)
 
-        posts_df = TextProcessor.parse_posts(posts_list)
-        groups_df = TextProcessor.parse_groups(groups_list)
+        unprocessed_posts = storage.get_unprocessed_posts()
+        new_entities = extractor.get_entities(unprocessed_posts)
+        storage.add_entities(new_entities)
+
+        posts = storage.get_posts()
+        groups = storage.get_groups()
+        entities = storage.get_entities()
+
+        posts_df = TextProcessor.parse_posts(posts)
+        groups_df = TextProcessor.parse_groups(groups)
+        entities_df = TextProcessor.parse_entities(entities)
 
 
 def update_data_loop(update_loop):

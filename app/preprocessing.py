@@ -21,8 +21,8 @@ class TextProcessor:
         words = [self.morph.normal_forms(w)[0] for w in words]
         return ' '.join(words)
 
-    @staticmethod
-    def parse_title(title: str) -> str:
+    @classmethod
+    def parse_title(cls, title: str) -> str:
         if len(title) < 80:
             return title
         processed_title = ''
@@ -41,19 +41,19 @@ class TextProcessor:
                 processed_title += ch
         return processed_title
 
-    @staticmethod
-    def parse_groups(groups_list: List[tuple]) -> pd.DataFrame:
+    @classmethod
+    def parse_groups(cls, groups_list: List[tuple]) -> pd.DataFrame:
         return pd.DataFrame({
-            'id': [group[0] for group in groups_list],
+            'group_id': [group[0] for group in groups_list],
             'name': [group[2] for group in groups_list],
             'screen_name': [group[1] for group in groups_list],
             'members_count': [group[3] for group in groups_list]
         })
 
-    @staticmethod
-    def parse_posts(posts_list: List[tuple]) -> pd.DataFrame:
+    @classmethod
+    def parse_posts(cls, posts_list: List[tuple]) -> pd.DataFrame:
         df = pd.DataFrame({
-            'id': [post[0] for post in posts_list],
+            'post_id': [post[0] for post in posts_list],
             'title': [post[3] for post in posts_list],
             'text': [post[4] for post in posts_list],
             'group': [post[1] for post in posts_list],
@@ -70,3 +70,12 @@ class TextProcessor:
                                                'Просмотры: ' + str(row['views_count']) + '<br>' +
                                                'Репосты: ' + str(row['reposts_count']), axis=1)
         return df.sort_values(by=['date'], ascending=False)
+
+    @classmethod
+    def parse_entities(cls, entities_list: List[tuple]) -> pd.DataFrame:
+        return pd.DataFrame({
+            'post_id': [entity[0] for entity in entities_list],
+            'type': [entity[1] for entity in entities_list],
+            'date': [entity[2] for entity in entities_list],
+            'entity': [entity[3] for entity in entities_list]
+        })

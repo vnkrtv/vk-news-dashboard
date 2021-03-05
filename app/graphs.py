@@ -75,7 +75,6 @@ class NewsTable:
     def get_post_href(group_screen_name: str, group_id: int, post_id: int) -> str:
         return f'https://vk.com/{group_screen_name}?w=wall-{group_id}_{post_id}'
 
-
     @staticmethod
     def update_news(posts_df: pd.DataFrame, groups_df: pd.DataFrame) -> List[Any]:
         max_rows = 6
@@ -96,10 +95,10 @@ class NewsTable:
                                         children=posts_df.iloc[i]["title"],
                                         href=NewsTable.get_post_href(
                                             group_screen_name=posts_df.iloc[i]["group"],
-                                            post_id=posts_df.iloc[i]["id"],
+                                            post_id=posts_df.iloc[i]["post_id"],
                                             group_id=groups_df[
                                                 groups_df['screen_name'] == posts_df.iloc[i]["group"]
-                                            ].iloc[0]['id']),
+                                            ].iloc[0]['group_id']),
                                         title=groups_df[
                                             groups_df['screen_name'] == posts_df.iloc[i]["group"]
                                             ].iloc[0]['name'] + '\n' +
