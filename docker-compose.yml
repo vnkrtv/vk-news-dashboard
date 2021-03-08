@@ -7,7 +7,7 @@ services:
     container_name: vk-news-postgres
     restart: always
     env_file:
-      - cfg.env
+      - deploy/cfg.env
     networks:
       - backend
 
@@ -16,7 +16,7 @@ services:
     container_name: vk-news-loader
     restart: always
     env_file:
-      - cfg.env
+      - deploy/cfg.env
     depends_on:
       - postgres
     networks:
@@ -29,7 +29,7 @@ services:
     ports:
       - "0.0.0.0:8050:5000"
     env_file:
-      - cfg.env
+      - deploy/cfg.env
     depends_on:
       - news-loader
     networks:

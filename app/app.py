@@ -1,6 +1,6 @@
 import asyncio
 import threading
-from typing import List, Any
+from typing import List, Tuple, Any
 
 import dash
 import dash_html_components as html
@@ -9,7 +9,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 from . import config as cfg
-from . import graphs
+from . import plots
 from .preprocessing import TextProcessor
 from .entities_extractor import EntitiesExtractor
 from .postgres import Storage
@@ -18,7 +18,7 @@ from .layout import Layout
 app = dash.Dash(
     'VK News',
     meta_tags=[{"name": "viewport", "content": "width=device-width"}],
-    external_stylesheets=[dbc.themes.DARKLY],
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
     serve_locally=True
 )
 
@@ -41,124 +41,124 @@ posts_df = TextProcessor.parse_posts(posts)
 groups_df = TextProcessor.parse_groups(groups)
 entities_df = TextProcessor.parse_entities(entities)
 
-app.layout = html.Div([
-    Layout.Navbar,
-    html.Div([
-        html.Div([
-            html.Div([
-                dbc.Card([
-                    html.Div([
-                        html.H4('Группа'),
-                        dcc.Dropdown(
-                            options=[
-                                {'label': groups_df.iloc[i]['name'], 'value': groups_df.iloc[i]['name']}
-                                for i in range(len(groups_df))
-                            ],
-                            value=groups_df.iloc[0]['name'],
-                            id='group-select',
-                            style={'color': 'black'})
-                    ],
-                        style={'margin': '1vh'}),
-                    html.Div([],
-                             id='group-info',
-                             style={'margin': '1vh'}),
-                    dcc.Interval(
-                                id='data-update-interval',
-                                interval=1000 * cfg.DATA_UPDATING_INTERVAL,  # in milliseconds
-                                n_intervals=0
-                            ),
-                    html.Div([],
-                             style={'margin': '1vh'},
-                             id='news-container')
-                ], id='left-card')
+layout = Layout(groups=list(groups_df['name'].values), data_update_interval=cfg.DATA_UPDATING_INTERVAL)
 
-            ],
-                className='col-2'),
-            html.Div([],
-                     className='col-5',
-                     id='left-plots'),
-            html.Div([],
-                     className='col-5',
-                     id='right-plots')
+app.layout = html.Div([
+    layout.Navbar,
+    dbc.Row([
+        dbc.Col([
+            layout.GroupCard,
+            layout.NewsCard
         ],
-            className='row')
+            md=2),
+        dbc.Col(layout.GroupStatPlots,
+                md=5,
+                style={
+                    # 'margin-left': '1vh',
+                    'margin-top': '1vh'
+                }
+                ),
+        dbc.Col(layout.WordCloudCard,
+                md=5,
+                style={
+                    # 'margin-left': '1vh',
+                    'margin-top': '1vh'
+                }
+                )
     ],
-        className='', style={'width': '97%', 'margin': '3vh'}),
-    dbc.Card(Layout.WordCloudPlots)
+        style={"border": "0px", "margin-right": 0, "margin-left": 0, "max-width": "100%"}
+    )
 ])
 
 
 @app.callback(
-    Output("left-plots", "children"),
-    [Input("group-select", "value")])
-def left_plots_update(value) -> List[html.Div]:
-    if value is None:
-        return []
-    group = groups_df[groups_df['name'] == value].iloc[0]
-    return [
-        graphs.LineCharts.views(posts_df, group),
-        graphs.LineCharts.comments(posts_df, group)]
-
-
-@app.callback(
     [
-        Output("bank-wordcloud", "figure"),
-        Output("frequency_figure", "figure"),
-        Output("bank-treemap", "figure"),
-        Output("no-data-alert", "style"),
+        Output("news-wordcloud", "figure"),
+        # Output("frequency_figure", "figure"),
+        Output("news-treemap", "figure"),
+        Output("no-data-alert", "style")
     ],
     [
         Input("group-select", "value")
     ],
 )
-def update_wordcloud_plot(value):
-    """ Callback to rerender wordcloud plot """
-    wordcloud, frequency_figure, treemap = graphs.WordCloudPlot.make_wordcload(entities_df)
+def update_wordcloud_plot(group_name: str):
+    if group_name is None:
+        alert_style = {"display": "block"}
+        return {}, {}, alert_style
+    group = groups_df[groups_df['name'] == group_name].iloc[0]
+    group_entities = entities_df[
+        entities_df['post_id'].isin(
+            posts_df[posts_df['group'] == group['screen_name']]['post_id'].values
+        )
+    ]
+    wordcloud, frequency_figure, treemap = plots.WordCloudPlots.get_plots(group_entities)
     alert_style = {"display": "none"}
     if (wordcloud == {}) or (frequency_figure == {}) or (treemap == {}):
         alert_style = {"display": "block"}
-    print("redrawing bank-wordcloud...done")
-    return (wordcloud, frequency_figure, treemap, alert_style)
+    return wordcloud, treemap, alert_style
+    # return wordcloud, frequency_figure, treemap, alert_style
 
 
 @app.callback(
-    Output("right-plots", "children"),
-    [Input("group-select", "value")])
-def right_plots_update(value) -> List[html.Div]:
-    if value is None:
-        return []
-    group = groups_df[groups_df['name'] == value].iloc[0]
-    return [
-        graphs.LineCharts.likes(posts_df, group),
-        graphs.LineCharts.reposts(posts_df, group)]
+    [
+        Output("group-views-plot", "figure"),
+        Output("group-comments-plot", "figure"),
+        Output("group-likes-plot", "figure"),
+        Output("group-reposts-plot", "figure")
+    ],
+    [
+        Input("group-select", "value")
+    ]
+)
+def update_group_stat_plots(group_name: str):
+    if group_name is None:
+        return {}, {}, {}, {}
+    group = groups_df[groups_df['name'] == group_name].iloc[0]
+    data = posts_df[posts_df['group'] == group['screen_name']]
+
+    views_fig = plots.LineCharts.views(data)
+    comments_fig = plots.LineCharts.comments(data)
+    likes_fig = plots.LineCharts.likes(data)
+    reposts_fig = plots.LineCharts.reposts(data)
+
+    # return views_fig, comments_fig
+    return views_fig, comments_fig, likes_fig, reposts_fig
 
 
 @app.callback(
     Output("group-info", "children"),
-    [Input("group-select", "value")])
-def groups_info_update(value) -> List[Any]:
-    if value is None:
+    [
+        Input("group-select", "value")
+    ]
+)
+def groups_info_update(group_name: str) -> List[Any]:
+    if group_name is None:
         return []
-    group = groups_df[groups_df['name'] == value].iloc[0]
+    group = groups_df[groups_df['name'] == group_name].iloc[0]
     group_posts = posts_df[posts_df['group'] == group['screen_name']]
     children = [
         html.A(f'Число подписчиков: {group["members_count"]}'),
         html.Br(),
-        html.A(f'Среднее число просмотров: {int(group_posts["views_count"].mean())}'),
+        html.A(f'В среднем просмотров: {int(group_posts["views_count"].mean())}'),
         html.Br(),
-        html.A(f'Среднее число лайков: {int(group_posts["likes_count"].mean())}'),
+        html.A(f'В среднем лайков: {int(group_posts["likes_count"].mean())}'),
         html.Br(),
-        html.A(f'Среднее число комментариев: {int(group_posts["comments_count"].mean())}'),
+        html.A(f'В среднем комментариев: {int(group_posts["comments_count"].mean())}'),
         html.Br(),
-        html.A(f'Среднее число репостов: {int(group_posts["reposts_count"].mean())}')
+        html.A(f'В среднем репостов: {int(group_posts["reposts_count"].mean())}')
     ]
     return children
 
 
-@app.callback(Output('news-container', 'children'),
-              [Input('data-update-interval', 'n_intervals')])
+@app.callback(
+    Output('news-container', 'children'),
+    [
+        Input('data-update-interval', 'n_intervals')
+    ]
+)
 def update_news(_) -> List[Any]:
-    return graphs.NewsTable.update_news(posts_df, groups_df)
+    return plots.NewsTable.update_news(posts_df, groups_df)
 
 
 @asyncio.coroutine

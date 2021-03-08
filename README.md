@@ -29,8 +29,8 @@ Clone [service](https://github.com/vnkrtv/go-vk-news-loader) which provides load
 Set list of vk groups screen names in go-vk-news-loader/config/groups.json. Default groups.json content:
 - ```["meduzaproject", "ria", "kommersant_ru", "tj", "rbc"]```
 
-Run script which builds docker-compose service:
--  ```./deploy/deploy_service```  
+Manage app settings in 'deploy/cfg.env':
+-  ``` nano deploy/cfg.env```  
 
 Run service:
 -  ```docker-compose up```
