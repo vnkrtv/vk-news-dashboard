@@ -6,9 +6,8 @@ services:
     image: postgres:latest
     container_name: vk-news-postgres
     restart: always
-    environment:
-      - POSTGRES_PASSWORD=PG_PASS
-      - POSTGRES_DB=vknews
+    env_file:
+      - cfg.env
     networks:
       - backend
 
@@ -16,6 +15,8 @@ services:
     image: go-vk-news-loader
     container_name: vk-news-loader
     restart: always
+    env_file:
+      - cfg.env
     depends_on:
       - postgres
     networks:
@@ -27,6 +28,8 @@ services:
     restart: always
     ports:
       - "0.0.0.0:8050:5000"
+    env_file:
+      - cfg.env
     depends_on:
       - news-loader
     networks:
