@@ -1,7 +1,6 @@
 from typing import List, Generator
 
 import psycopg2
-import pandas as pd
 
 
 class PostgresStorage:
@@ -42,7 +41,6 @@ class PostgresStorage:
         except psycopg2.Error as e:
             self.conn.rollback()
             raise e
-        return cursor.fetchall()
 
 
 class GroupsStorage(PostgresStorage):

@@ -1,5 +1,6 @@
 import asyncio
 import threading
+from typing import List, Any
 
 import dash
 import dash_html_components as html
@@ -12,6 +13,7 @@ from . import graphs
 from .preprocessing import TextProcessor
 from .entities_extractor import EntitiesExtractor
 from .postgres import Storage
+from .layout import Layout
 
 app = dash.Dash(
     'VK News',
@@ -40,13 +42,7 @@ groups_df = TextProcessor.parse_groups(groups)
 entities_df = TextProcessor.parse_entities(entities)
 
 app.layout = html.Div([
-    html.Div([
-        html.A(className="navbar-brand", children=[
-            html.Strong('VK News Dashboard')
-        ],
-               style={'position': 'absolute', 'margin-top': '0.5vh'})
-    ],
-        className='navbar navbar-dark bg-dark shadow-sm', style={'height': '5vh'}),
+    Layout.Navbar,
     html.Div([
         html.Div([
             html.Div([
@@ -68,7 +64,7 @@ app.layout = html.Div([
                              style={'margin': '1vh'}),
                     dcc.Interval(
                                 id='data-update-interval',
-                                interval=1000 * DATA_UPDATING_INTERVAL,  # in milliseconds
+                                interval=1000 * cfg.DATA_UPDATING_INTERVAL,  # in milliseconds
                                 n_intervals=0
                             ),
                     html.Div([],
@@ -87,16 +83,17 @@ app.layout = html.Div([
         ],
             className='row')
     ],
-        className='', style={'width': '97%', 'margin': '3vh'})
+        className='', style={'width': '97%', 'margin': '3vh'}),
+    dbc.Card(Layout.WordCloudPlots)
 ])
 
 
 @app.callback(
     Output("left-plots", "children"),
     [Input("group-select", "value")])
-def left_plots_update(value):
+def left_plots_update(value) -> List[html.Div]:
     if value is None:
-        return
+        return []
     group = groups_df[groups_df['name'] == value].iloc[0]
     return [
         graphs.LineCharts.views(posts_df, group),
@@ -104,11 +101,32 @@ def left_plots_update(value):
 
 
 @app.callback(
+    [
+        Output("bank-wordcloud", "figure"),
+        Output("frequency_figure", "figure"),
+        Output("bank-treemap", "figure"),
+        Output("no-data-alert", "style"),
+    ],
+    [
+        Input("group-select", "value")
+    ],
+)
+def update_wordcloud_plot(value):
+    """ Callback to rerender wordcloud plot """
+    wordcloud, frequency_figure, treemap = graphs.WordCloudPlot.make_wordcload(entities_df)
+    alert_style = {"display": "none"}
+    if (wordcloud == {}) or (frequency_figure == {}) or (treemap == {}):
+        alert_style = {"display": "block"}
+    print("redrawing bank-wordcloud...done")
+    return (wordcloud, frequency_figure, treemap, alert_style)
+
+
+@app.callback(
     Output("right-plots", "children"),
     [Input("group-select", "value")])
-def right_plots_update(value):
+def right_plots_update(value) -> List[html.Div]:
     if value is None:
-        return
+        return []
     group = groups_df[groups_df['name'] == value].iloc[0]
     return [
         graphs.LineCharts.likes(posts_df, group),
@@ -118,7 +136,7 @@ def right_plots_update(value):
 @app.callback(
     Output("group-info", "children"),
     [Input("group-select", "value")])
-def groups_info_update(value):
+def groups_info_update(value) -> List[Any]:
     if value is None:
         return []
     group = groups_df[groups_df['name'] == value].iloc[0]
@@ -139,7 +157,7 @@ def groups_info_update(value):
 
 @app.callback(Output('news-container', 'children'),
               [Input('data-update-interval', 'n_intervals')])
-def update_news(_):
+def update_news(_) -> List[Any]:
     return graphs.NewsTable.update_news(posts_df, groups_df)
 
 
