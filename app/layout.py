@@ -14,18 +14,26 @@ class Layout:
         self.data_update_interval = data_update_interval * 1000
 
     @property
-    def Navbar(self) -> html.Div:
-        return html.Div([
-            html.A(
-                className="navbar-brand",
-                children=[
-                    html.Strong('VK News Dashboard')
-                ],
-                style={'position': 'absolute', 'margin-top': '0.5vh'}
-            )
-        ],
-            className='navbar navbar-dark bg-dark shadow-sm',
-            style={'height': '5vh'}
+    def Navbar(self) -> dbc.Navbar:
+        return dbc.Navbar(
+            children=[
+                html.A(
+                    dbc.Row(
+                        [
+                            # dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                            dbc.Col(
+                                dbc.NavbarBrand("VK News Dashboard", className="ml-2")
+                            ),
+                        ],
+                        align="center",
+                        no_gutters=True,
+                    ),
+                    href="https://github.com/vnkrtv/vk-news-dashboard",
+                )
+            ],
+            color="dark",
+            dark=True,
+            sticky="top",
         )
 
     @property
