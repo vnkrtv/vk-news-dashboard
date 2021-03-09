@@ -38,6 +38,7 @@ class PostgresStorage:
         try:
             psycopg2.extras.execute_values(
                 cursor, insert_query, data)
+            self.conn.commit()
         except psycopg2.Error as e:
             self.conn.rollback()
             raise e

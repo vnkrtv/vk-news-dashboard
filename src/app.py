@@ -1,19 +1,22 @@
 import asyncio
 import threading
+from datetime import datetime
 from typing import List, Tuple, Any
 
+import pandas as pd
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+from dateutil import relativedelta
 
-from . import config as cfg
-from . import plots
-from .preprocessing import TextProcessor
-from .entities_extractor import EntitiesExtractor
-from .postgres import Storage
-from .layout import Layout
+from src import config as cfg
+from src import plots
+from src.preprocessing import TextProcessor
+from src.entities_extractor import EntitiesExtractor
+from src.postgres import Storage
+from src.layout import Layout
 
 app = dash.Dash(
     'VK News',
@@ -71,6 +74,62 @@ app.layout = html.Div([
 ])
 
 
+def make_marks_time_slider(start: datetime, end: datetime):
+    points_count = 6
+    delta = (end - start) / points_count
+    ret = {
+        int((start + delta * i).timestamp()): (start + delta * i).strftime('%d-%m-%Y')
+        for i in range(points_count)
+    }
+    return ret
+
+
+def get_entities(group_name: str, entity_type: str, start_date: datetime, end_date: datetime) -> pd.DataFrame:
+    group = groups_df[groups_df['name'] == group_name].iloc[0]
+    group_entities = entities_df[
+        entities_df['post_id'].isin(
+            posts_df[posts_df['group'] == group['screen_name']]['post_id'].values
+        )
+        &
+        (entities_df['date'] <= end_date)
+        &
+        (entities_df['date'] >= start_date)
+    ]
+    if entity_type != 'ALL':
+        group_entities = group_entities[group_entities['type'] == entity_type]
+    return group_entities
+
+
+@app.callback(
+    [
+        Output("time-window-slider", "marks"),
+        Output("time-window-slider", "min"),
+        Output("time-window-slider", "max"),
+        Output("time-window-slider", "step"),
+        Output("time-window-slider", "value"),
+    ],
+    [Input("group-select", "value")],
+)
+def populate_time_slider(group_name: str):
+    group = groups_df[groups_df['name'] == group_name].iloc[0]
+    group_posts = posts_df[posts_df['group'] == group['screen_name']]
+
+    min_date = group_posts["date"].min()
+    max_date = group_posts["date"].max()
+
+    marks = make_marks_time_slider(min_date, max_date)
+    min_epoch = list(marks.keys())[0]
+    max_epoch = list(marks.keys())[-1]
+
+    return (
+        marks,
+        min_epoch,
+        max_epoch,
+        (max_epoch - min_epoch) / (len(list(marks.keys())) * 3),
+        [min_epoch, max_epoch],
+    )
+
+
 @app.callback(
     [
         Output("news-wordcloud", "figure"),
@@ -79,19 +138,17 @@ app.layout = html.Div([
         Output("no-data-alert", "style")
     ],
     [
-        Input("group-select", "value")
+        Input("group-select", "value"),
+        Input("entity-type-drop", "value"),
+        Input("time-window-slider", "value")
     ],
 )
-def update_wordcloud_plot(group_name: str):
-    if group_name is None:
-        alert_style = {"display": "block"}
-        return {}, {}, alert_style
-    group = groups_df[groups_df['name'] == group_name].iloc[0]
-    group_entities = entities_df[
-        entities_df['post_id'].isin(
-            posts_df[posts_df['group'] == group['screen_name']]['post_id'].values
-        )
-    ]
+def update_wordcloud_plot(group_name: str, entity_type: str, timestamps: List[int]):
+    group_entities = get_entities(
+        group_name=group_name,
+        entity_type=entity_type,
+        start_date=datetime.fromtimestamp(timestamps[0]),
+        end_date=datetime.fromtimestamp(timestamps[1]))
     wordcloud, frequency_figure, treemap = plots.WordCloudPlots.get_plots(group_entities)
     alert_style = {"display": "none"}
     if (wordcloud == {}) or (frequency_figure == {}) or (treemap == {}):
@@ -115,12 +172,12 @@ def update_group_stat_plots(group_name: str):
     if group_name is None:
         return {}, {}, {}, {}
     group = groups_df[groups_df['name'] == group_name].iloc[0]
-    data = posts_df[posts_df['group'] == group['screen_name']]
+    group_posts = posts_df[posts_df['group'] == group['screen_name']]
 
-    views_fig = plots.LineCharts.views(data)
-    comments_fig = plots.LineCharts.comments(data)
-    likes_fig = plots.LineCharts.likes(data)
-    reposts_fig = plots.LineCharts.reposts(data)
+    views_fig = plots.LineCharts.views(group_posts)
+    comments_fig = plots.LineCharts.comments(group_posts)
+    likes_fig = plots.LineCharts.likes(group_posts)
+    reposts_fig = plots.LineCharts.reposts(group_posts)
 
     # return views_fig, comments_fig
     return views_fig, comments_fig, likes_fig, reposts_fig

@@ -1,6 +1,5 @@
 from typing import List, Dict
 
-import pandas as pd
 from natasha import (
     Segmenter,
     MorphVocab,
@@ -13,7 +12,7 @@ from natasha import (
     Doc
 )
 
-from .preprocessing import TextProcessor
+from src.preprocessing import TextProcessor
 
 
 class EntitiesExtractor:

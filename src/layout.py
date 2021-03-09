@@ -48,6 +48,7 @@ class Layout:
                     ],
                     value=self.groups[0],
                     id='group-select',
+                    clearable=False,
                     style={'color': 'black'}
                 ),
                 html.Div([], id='group-info'),
@@ -145,7 +146,7 @@ class Layout:
     @property
     def WordCloudCard(self) -> dbc.Card:
         return dbc.Card([
-            dbc.CardHeader(html.H4("Наиболее упоминаемые сущности")),
+            dbc.CardHeader(html.H4("Наиболее упоминаемые именованные сущности")),
             dbc.Alert(
                 "Недостаточно данных для для отображения графиков",
                 id="no-data-alert",
@@ -154,6 +155,24 @@ class Layout:
             ),
             dbc.CardBody(
                 [
+                    dbc.Row([
+                        dbc.Col([
+                            html.Label("Тип"),
+                            dcc.Dropdown(
+                                options=[
+                                    {'value': 'ALL', 'label': '-'},
+                                    {'value': 'ORG', 'label': 'Организации'},
+                                    {'value': 'LOC', 'label': 'Топонимы'},
+                                    {'value': 'PER', 'label': 'Персоны'}
+                                ],
+                                value='ALL',
+                                id="entity-type-drop",
+                                clearable=False,
+                            ),
+                            html.Label("Временной промежуток", style={'margin-top': '1vh'}),
+                            html.Div(dcc.RangeSlider(id="time-window-slider"))
+                        ]),
+                    ]),
                     dbc.Row(
                         [
                             # dbc.Col(

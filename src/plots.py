@@ -138,6 +138,11 @@ class WordCloudPlots:
         for i in freq_list:
             new_freq_list.append(i * 80)
 
+        new_freq_list = [freq for freq in filter(lambda f: f > 1, new_freq_list)]
+        color_list = color_list[:len(new_freq_list)]
+        word_list = word_list[:len(new_freq_list)]
+        freq_list = freq_list[:len(new_freq_list)]
+
         trace = go.Scatter(
             x=x_arr,
             y=y_arr,
