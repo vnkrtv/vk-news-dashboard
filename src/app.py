@@ -1,15 +1,14 @@
 import asyncio
 import threading
+import logging
 from datetime import datetime
 from typing import List, Tuple, Any
 
 import pandas as pd
 import dash
 import dash_html_components as html
-import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-from dateutil import relativedelta
 
 from src import config as cfg
 from src import plots
@@ -18,6 +17,7 @@ from src.entities_extractor import EntitiesExtractor
 from src.postgres import Storage
 from src.layout import Layout
 
+logging.basicConfig(level=logging.INFO)
 app = dash.Dash(
     'VK News',
     meta_tags=[{"name": "viewport", "content": "width=device-width"}],
@@ -225,8 +225,10 @@ def update_data():
         yield from asyncio.sleep(cfg.DATA_UPDATING_INTERVAL)
 
         unprocessed_posts = storage.get_unprocessed_posts()
+        logging.info('Loaded %d new posts' % len(unprocessed_posts))
         new_entities = extractor.get_entities(unprocessed_posts)
         storage.add_entities(new_entities)
+        logging.info('Add %d new entities' % len(new_entities))
 
         posts = storage.get_posts()
         groups = storage.get_groups()
@@ -235,6 +237,8 @@ def update_data():
         posts_df = TextProcessor.parse_posts(posts)
         groups_df = TextProcessor.parse_groups(groups)
         entities_df = TextProcessor.parse_entities(entities)
+
+        logging.info('Update posts and entities')
 
 
 def update_data_loop(update_loop):
