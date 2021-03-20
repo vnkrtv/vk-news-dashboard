@@ -1,6 +1,7 @@
 from typing import List, Generator
 
 import psycopg2
+import psycopg2.extras
 
 
 class PostgresStorage:

@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Dict
 
 from natasha import (
@@ -54,5 +55,5 @@ class EntitiesExtractor:
             for entity in self.extract_entities(post['title']):
                 post_entities[entity['text']] = entity['type']
             for entity, entity_type in post_entities.items():
-                entities.append((post['post_id'], entity_type, post['date'], entity))
+                entities.append((post['post_id'], entity_type, post['date'] - datetime.timedelta(hours=3), entity))
         return entities
