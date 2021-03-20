@@ -58,7 +58,7 @@ class PostsStorage(PostgresStorage):
         return list(self.exec_query(query, params))
 
     def get_unprocessed_posts(self) -> List[tuple]:
-        query, params = '''SELECT post_id, date, title, text 
+        query, params = '''SELECT *
                              FROM posts 
                             WHERE date > (SELECT MAX(date) FROM entities)''', []
         return list(self.exec_query(query, params))
