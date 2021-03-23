@@ -227,7 +227,8 @@ def update_data():
         unprocessed_posts = storage.get_unprocessed_posts()
         logging.info('Loaded %d new posts' % len(unprocessed_posts))
         new_entities = extractor.get_entities(unprocessed_posts)
-        storage.add_entities(new_entities)
+        if new_entities:
+            storage.add_entities(new_entities)
         logging.info('Add %d new entities' % len(new_entities))
 
         posts = storage.get_posts()
