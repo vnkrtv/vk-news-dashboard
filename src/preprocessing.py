@@ -73,9 +73,27 @@ class TextProcessor:
 
     @classmethod
     def parse_entities(cls, entities_list: List[tuple]) -> pd.DataFrame:
+        post_ids = []
+        types = []
+        dates = []
+        entities = []
+        for entity in entities_list:
+            post_ids.append(entity[0])
+            types.append(entity[1])
+            dates.append(entity[2])
+            if entity[1] == 'PER':
+                entities.append(entity[3].split()[-1])
+            else:
+                entities.append(entity[3])
         return pd.DataFrame({
-            'post_id': [entity[0] for entity in entities_list],
-            'type': [entity[1] for entity in entities_list],
-            'date': [entity[2] for entity in entities_list],
-            'entity': [entity[3] for entity in entities_list]
+            'post_id': post_ids,
+            'type': types,
+            'date': dates,
+            'entity': entities
         })
+
+    @classmethod
+    def process_entities_df(cls, entities_df: pd.DataFrame) -> pd.DataFrame:
+        processed_df = entities_df.copy()
+        processed_df['entity'] = processed_df.apply(lambda row: row['entity'].split()[-1], axis=1)
+        return processed_df

@@ -1,5 +1,6 @@
 import datetime
 from typing import List, Any
+from collections import Counter
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -101,15 +102,13 @@ class WordCloudPlots:
 
     @classmethod
     def get_plots(cls, data: pd.DataFrame) -> Any:
-        complaints_text = list(data["entity"].dropna().values)
+        entities = dict(data["entity"].value_counts())
 
-        if len(complaints_text) < 1:
+        if len(entities) < 1:
             return {}, {}, {}
 
-        text = " ".join(complaints_text)
-
         word_cloud = WordCloud(stopwords=set(cls.stopwords), max_words=100, max_font_size=90)
-        word_cloud.generate(text)
+        word_cloud.generate_from_frequencies(entities)
 
         word_list = []
         freq_list = []

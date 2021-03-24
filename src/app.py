@@ -79,7 +79,7 @@ def make_marks_time_slider(start: datetime, end: datetime):
     delta = (end - start) / points_count
     ret = {
         int((start + delta * i).timestamp()): (start + delta * i).strftime('%d-%m-%Y')
-        for i in range(points_count)
+        for i in range(points_count + 1)
     }
     return ret
 
@@ -219,14 +219,16 @@ def update_news(_) -> List[Any]:
 
 
 @asyncio.coroutine
-def update_data():
+async def update_data():
     global storage, extractor, posts, groups, entities, posts_df, groups_df, entities_df
     while True:
-        yield from asyncio.sleep(cfg.DATA_UPDATING_INTERVAL)
+        await asyncio.sleep(cfg.DATA_UPDATING_INTERVAL)
 
         unprocessed_posts = storage.get_unprocessed_posts()
         logging.info('Loaded %d new posts' % len(unprocessed_posts))
-        new_entities = extractor.get_entities(unprocessed_posts)
+        new_entities = []
+        if unprocessed_posts:
+            new_entities = extractor.get_entities(unprocessed_posts)
         if new_entities:
             storage.add_entities(new_entities)
         logging.info('Add %d new entities' % len(new_entities))

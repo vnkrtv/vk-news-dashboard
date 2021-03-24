@@ -48,20 +48,25 @@ class PostgresStorage:
 class GroupsStorage(PostgresStorage):
 
     def get_groups(self) -> List[tuple]:
-        query, params = 'SELECT * FROM groups', []
+        query, params = 'SELECT group_id, screen_name, name, members_count FROM groups', []
         return list(self.exec_query(query, params))
 
 
 class PostsStorage(PostgresStorage):
 
     def get_posts(self) -> List[tuple]:
-        query, params = 'SELECT * FROM posts', []
+        query, params = '''
+            SELECT post_id, group_screen_name, date, title, text, 
+                   likes_count, views_count, comments_count, reposts_count
+            FROM posts''', []
         return list(self.exec_query(query, params))
 
     def get_unprocessed_posts(self) -> List[tuple]:
-        query, params = '''SELECT *
-                             FROM posts 
-                            WHERE date > (SELECT MAX(date) FROM entities)''', []
+        query, params = '''
+            SELECT post_id, group_screen_name, date, title, text, 
+                   likes_count, views_count, comments_count, reposts_count
+            FROM posts 
+            WHERE date > (SELECT MAX(date) FROM entities)''', []
         return list(self.exec_query(query, params))
 
 
