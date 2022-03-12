@@ -24,7 +24,7 @@ natasha==1.4.0
 navec==0.10.0
 numpy==1.20.1
 pandas==1.0.4
-Pillow==8.1.2
+Pillow==9.0.1
 plotly==4.8.1
 psycopg2-binary==2.8.5
 pymorphy2==0.8
